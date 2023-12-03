@@ -3,7 +3,7 @@ import 'dotenv/config'
 
 const genAccessToken = (user) => {
     return jwt.sign(
-        {id: user._id, username: user.username},
+        {id: user._id, username: user.username, role: user.role},
          process.env.SECRET_ACCESS,
          {expiresIn: '1h'})
     

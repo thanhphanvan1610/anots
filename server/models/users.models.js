@@ -25,6 +25,10 @@ const userSchema = new Schema({
             return `https://ui-avatars.com/api/?name=${this.username.toUpperCase()}`;
         }
     },
+    verify: {
+        type: Boolean,
+        default: false
+    },
     apitoken: {
         type: String
     }
