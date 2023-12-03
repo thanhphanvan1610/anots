@@ -14,7 +14,7 @@ class UserAuthService {
             if (!username || !email || !password) {
                 return res.status(400).json({
                     status: 'failed',
-                    message: 'Username and password are required',
+                    message: 'Username, Email and password are required',
                     code: 400
                 });
             }
@@ -66,7 +66,8 @@ class UserAuthService {
             const data = retrieveData(user);
             return res.status(201).json({
                 status: 'success',
-                message: data,
+                message: 'Sign up successful',
+                data: data,
                 code: 201
             });
     
@@ -104,16 +105,19 @@ class UserAuthService {
                     code: 401
                 });
             }
+
             const refresh_token = genRefreshToken(user)
             res.cookie('refresh_token', refresh_token, {
                 httpOnly: true,
                 secure: false,
                 sameSite: "strict"
             })
+            
             const data = retrieveData(user)
             return res.status(200).json({
                 status: 'success',
-                message: data,
+                message: 'Sign in successful',
+                data: data,
                 code: 200
             });
         } catch (error) {
@@ -141,7 +145,8 @@ class UserAuthService {
             });
             return res.status(200).json({
                 status: 'success',
-                message: {
+                message: 'refresh token sucessful',
+                data: {
                     access_token: newAccessToken
                 },
                 code: 200
