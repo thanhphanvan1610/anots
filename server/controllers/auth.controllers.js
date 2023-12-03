@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import User from '../models/users.models.js';
 import retrieveData from '../helpers/format_data.js';
-import { genRefreshToken } from '../helpers/jwt.js';
+import { genAccessToken, genRefreshToken } from '../helpers/jwt.js';
 
 
 class UserAuthService {
@@ -119,6 +120,37 @@ class UserAuthService {
             next(error.message)
         }
     }
+
+    async refreshToken(req, res, next) {
+        const refresh_token = req.cookies.refresh_token;
+        if(!refresh_token){
+            return res.status(401).json({
+                status: 'failed',
+                message: 'Unauthenticated',
+                code: 401
+            });
+        }
+        try {
+            const decode = jwt.verify(refresh_token, process.env.SECRET_REFRESH);
+            const newAccessToken = genAccessToken(decode);
+            const newRefreshToken = genRefreshToken(decode);
+            res.cookie('refresh_token', newRefreshToken, {
+                httpOnly: true,
+                secure: false,
+                sameSite: "strict"
+            });
+            return res.status(200).json({
+                status: 'success',
+                message: {
+                    access_token: newAccessToken
+                },
+                code: 200
+            });
+        } catch (error) {
+            next(error.message)
+        }
+    }
+    
     
 }
 
