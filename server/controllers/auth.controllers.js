@@ -70,14 +70,14 @@ class UserAuthService {
 
         try {
             const {username, password, email} = req.body;
-            if (!username || !password) {
+            if (!username && !email || !password) {
                 return res.status(400).json({
                     status: 'failed',
                     message: 'Username and password are required',
                     code:400
                 });
             }
-            const user = await User.findOne({username: username, email: email});
+            const user = await User.findOne({$or: [{username: username}, {email: email}]});
             if(!user){
                 return res.status(404).json({
                     status: 'failed',
