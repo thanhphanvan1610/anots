@@ -8,7 +8,7 @@ import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/users.routes.js';
 import { checkAdmin } from './middlewares/verify_token.js';
 import errorRoutes from './routes/error.routes.js';
-
+import './database/redis.js'
 
 const app = express();
 const PORT = process.env.PORT;
@@ -41,6 +41,7 @@ app.use((error, req, res, next) => {
 
 
 app.listen(PORT, async() => {
+  
     await connect();
     console.log(`Server running on port ${PORT}`);
 })

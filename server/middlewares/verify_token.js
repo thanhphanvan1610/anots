@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config'
 
-const verifyToken = (req, res, next) => {
+const verifyAccessToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
     if(!authHeader){
         return res.status(401).json({
@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
 }
 
 const checkAdmin = (req, res, next) => {
-    verifyToken(req, res, () => {
+    verifyAccessToken(req, res, () => {
         if(req.user && req.user.role === 'admin'){
             next();
         }else{
@@ -38,4 +38,4 @@ const checkAdmin = (req, res, next) => {
     })
 }
 
-export { verifyToken, checkAdmin };
+export { verifyAccessToken, checkAdmin };

@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import User from '../models/users.models.js';
 import retrieveData from '../helpers/format_data.js';
 import { genAccessToken, genRefreshToken } from '../helpers/jwt.js';
+import client from '../database/redis.js'
+import { getAsync } from '../helpers/jwt.js';
 
 
 class UserAuthService {
@@ -136,6 +138,19 @@ class UserAuthService {
         }
         try {
             const decode = jwt.verify(refresh_token, process.env.SECRET_REFRESH);
+            
+            if (decode && decode.refresh_token) {
+                const key = decode.refresh_token.toString();
+                const data = await getAsync(key);
+                if(JSON.parse(data)?.refresh_token !== refresh_token){
+                    return res.status(403).json({
+                        status: 'failed',
+                        message: 'Invalid request! refresh token not match',
+                        code: 403
+                    });
+                }
+            } 
+    
             const newAccessToken = genAccessToken(decode);
             const newRefreshToken = genRefreshToken(decode);
             res.cookie('refresh_token', newRefreshToken, {
@@ -143,19 +158,22 @@ class UserAuthService {
                 secure: false,
                 sameSite: "strict"
             });
+    
             return res.status(200).json({
                 status: 'success',
-                message: 'refresh token sucessful',
+                message: 'refresh token successful',
                 data: {
                     access_token: newAccessToken
                 },
                 code: 200
             });
         } catch (error) {
+            console.log(error.message)
             next(error.message)
         }
     }
     
+       
     
 }
 
