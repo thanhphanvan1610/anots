@@ -9,6 +9,7 @@ const retrieveData = (user) => {
         username: user.username,
         email: user.email,
         role: user.role,
+        isban: user.isban,
         avatar: user.avatar,
         access_token: accessToken
     }

@@ -29,6 +29,10 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    isban:{
+        type: Boolean,
+        default: false
+    },
     apitoken: {
         type: String
     }

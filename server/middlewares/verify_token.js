@@ -15,10 +15,19 @@ const verifyAccessToken = (req, res, next) => {
         if(err){
             return res.status(403).json({
                 status: 'failed',
-                message: 'Failed to authenticate token',
+                message: 'token is invalid',
                 code: 403
             });
         }
+
+        if(decoded.isban === true){
+            return res.status(403).json({
+                status: 'failed',
+                message: 'You have been banned',
+                code: 403
+            });
+        }
+
         req.user = decoded;
         next();
     })

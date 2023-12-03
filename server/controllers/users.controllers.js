@@ -17,7 +17,7 @@ const getUsers = async(req, res, next) => {
 const updateUser = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { username, password, email, role, avatar } = req.body;
+        const { username, password, email, role, avatar, isban } = req.body;
     
         if (!username || !password) {
             return res.status(400).json({
@@ -58,7 +58,7 @@ const updateUser = async (req, res, next) => {
         const passwordhashed = await bcrypt.hash(password, salt);
         const updatedUser = await User.findByIdAndUpdate(
             id,
-            { username, password: passwordhashed, email, role, avatar },
+            { username, password: passwordhashed, email, role, avatar, isban },
             { new: true } 
         );
 
@@ -143,6 +143,64 @@ const deleteUser = async(req, res, next) => {
     }
 }
 
+const banUser = async(req, res, next) => {
+    try {
+        const id = req.query.user
+        if(!id){
+            return res.status(404).json({
+                status: 'failed',
+                message: 'required id user',
+                code: 400
+            });
+        }
+        const banUser = await User.findByIdAndUpdate(id, {isban: true}, {new: true});
+        if(!banUser){
+            return res.status(404).json({
+                status: 'failed',
+                message: 'User not found',
+                code: 404
+            });
+        }
+        return res.status(200).json({
+            status: 'success',
+            message: 'Successfully banned the user',
+            code: 200
+        });
+    } catch (error) {
+        console.log(error.message);
+        next(error)
+    }
+}
+
+
+const unBanUser = async(req, res, next) => {
+    try {
+        const id = req.query.user
+        if(!id){
+            return res.status(404).json({
+                status: 'failed',
+                message: 'required id user',
+                code: 400
+            });
+        }
+        const banUser = await User.findByIdAndUpdate(id, {isban: false}, {new: true});
+        if(!banUser){
+            return res.status(404).json({
+                status: 'failed',
+                message: 'User not found',
+                code: 404
+            });
+        }
+        return res.status(200).json({
+            status: 'success',
+            message: 'Successfully unbanned the user',
+            code: 200
+        });
+    } catch (error) {
+        console.log(error.message);
+        next(error)
+    }
+}
 
 
 
@@ -150,5 +208,7 @@ export {
     getUsers,
     updateUser,
     getUserById,
-    deleteUser
+    deleteUser,
+    banUser,
+    unBanUser
 }

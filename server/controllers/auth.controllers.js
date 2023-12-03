@@ -123,6 +123,7 @@ class UserAuthService {
                 code: 200
             });
         } catch (error) {
+            console.log(error.message)
             next(error.message)
         }
     }

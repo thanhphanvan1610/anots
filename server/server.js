@@ -19,7 +19,7 @@ app.use(cookieParser())
 //middlewares Authentication
 app.use('/v1/auth',authRoutes);
 
-app.use('/v1/users', checkAdmin,userRoutes)
+app.use('/v1/users', checkAdmin, userRoutes)
 
 // middlewares catch error
 

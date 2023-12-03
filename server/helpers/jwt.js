@@ -4,14 +4,14 @@ import client from '../database/redis.js';
 
 const genAccessToken = (user) => {
     return jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
+        { id: user.id, username: user.username, role: user.role, isban: user.isban },
         process.env.SECRET_ACCESS,
         { expiresIn: '1h' })
 
 }
 const genRefreshToken = (user) => {
     const refresh_token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
+        { id: user.id, username: user.username, role: user.role,isban: user.isban },
         process.env.SECRET_REFRESH,
         { expiresIn: '30d' })
 
