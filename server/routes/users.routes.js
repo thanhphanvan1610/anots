@@ -5,6 +5,8 @@ const router = Router();
 
 router.get('/', User.getUsers);
 router.put('/:id', User.updateUser)
+router.get('/:id', User.getUserById)
+router.delete('/:id', User.deleteUser)
 
 
 const userRoutes = router;

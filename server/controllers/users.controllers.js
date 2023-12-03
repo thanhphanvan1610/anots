@@ -76,16 +76,79 @@ const updateUser = async (req, res, next) => {
             code: 200
         });
     } catch (error) {
-        console.log(error.message)
+        
         next(error);
     }
 };
 
+const getUserById = async(req, res, next) => {
+    const {id} = req.params;
+    if (!id) {
+        return res.status(400).json({
+            status: 'failed',
+            message: 'User ID is required',
+            code: 400
+        });
+    }
+
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                status: 'failed',
+                message: 'User not found',
+                code: 404
+            });
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            message: user,
+            code: 200
+        });
+        
+    } catch (error) {
+        next(error);
+    }
+}
+
+const deleteUser = async(req, res, next) => {
+    const {id} = req.params;
+    if (!id) {
+        return res.status(400).json({
+            status: 'failed',
+            message: 'User ID is required',
+            code: 400
+        });
+    }
+
+    try {
+        const user = await User.findByIdAndDelete(id);
+        if (!user) {
+            return res.status(404).json({
+                status: 'failed',
+                message: 'User not found',
+                code: 404
+            });
+        }
+
+        return res.status(200).json({
+            status: 'success',
+            message: 'Successfully deleted the user',
+            code: 200
+        });
+        
+    } catch (error) {
+        next(error);
+    }
+}
 
 
 
 
 export {
     getUsers,
-    updateUser
+    updateUser,
+    getUserById,
+    deleteUser
 }
