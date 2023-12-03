@@ -91,6 +91,13 @@ class UserAuthService {
                 });
             }
             const user = await User.findOne({username});
+            if(user.isban === true){
+                return res.status(403).json({
+                    status: 'failed',
+                    message: 'You have been banned',
+                    code: 403
+                });
+            }
             if(!user){
                 return res.status(404).json({
                     status: 'failed',
