@@ -11,18 +11,25 @@ const genAccessToken = (user) => {
 }
 const genRefreshToken = (user) => {
     const refresh_token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role,isban: user.isban },
+        { id: user.id, username: user.username, role: user.role, isban: user.isban },
         process.env.SECRET_REFRESH,
-        { expiresIn: '30d' })
-
-        client.set(user.username.toString(), JSON.stringify({refresh_token: refresh_token}), (err) => {
-            if (err) {
-                console.error('Server Internal Error');
-            }
-        });
+        { expiresIn: '30d' }
+    );
+    
+    client.get(user.username.toString(), (err, data) => {
+        if (err) {
+            return res.status(500).json({
+                status: 'failed',
+                message: 'Server Internal Error',
+                code: 500
+            });
+        }
+        client.set(user.username.toString(), JSON.stringify({refresh_token: refresh_token}))
+    })
 
     return refresh_token;
 }
+
 const getAsync = (key) => {
     return new Promise((resolve, reject) => {
         client.get(key, (err, data) => {

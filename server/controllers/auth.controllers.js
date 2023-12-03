@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import User from '../models/users.models.js';
 import retrieveData from '../helpers/format_data.js';
 import { genAccessToken, genRefreshToken } from '../helpers/jwt.js';
-import client from '../database/redis.js'
 import { getAsync } from '../helpers/jwt.js';
 
 
@@ -12,7 +11,7 @@ class UserAuthService {
     async signUp(req, res, next) {
         try {
             const { username, password, email } = req.body;
-    
+
             if (!username || !email || !password) {
                 return res.status(400).json({
                     status: 'failed',
@@ -20,7 +19,7 @@ class UserAuthService {
                     code: 400
                 });
             }
-    
+
             if (username.length < 5) {
                 return res.status(400).json({
                     status: 'failed',
@@ -28,7 +27,7 @@ class UserAuthService {
                     code: 400
                 });
             }
-    
+
             // Validate email
             const emailRegex = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
             if (!emailRegex.test(email)) {
@@ -38,10 +37,10 @@ class UserAuthService {
                     code: 400
                 });
             }
-    
+
             const existingUser = await User.findOne({ username });  //check exist username
             const existingEmail = await User.findOne({ email });  //check exist email
-    
+
             if (existingUser || existingEmail) {
                 return res.status(400).json({
                     status: 'failed',
@@ -49,10 +48,10 @@ class UserAuthService {
                     code: 400
                 });
             }
-    
+
             const salt = await bcrypt.genSalt(10);
             const passwordhashed = await bcrypt.hash(password, salt);
-    
+
             const user = new User({ username, password: passwordhashed, email });
             await user.save();
 
@@ -64,7 +63,7 @@ class UserAuthService {
                 secure: false,
                 sameSite: "strict"
             })
-    
+
             const data = retrieveData(user);
             return res.status(201).json({
                 status: 'success',
@@ -72,33 +71,33 @@ class UserAuthService {
                 data: data,
                 code: 201
             });
-    
+
         } catch (error) {
             next(error);
         }
     }
-    
 
 
-    async signIn(req, res, next){
+
+    async signIn(req, res, next) {
         try {
-            const {username, password} = req.body;
+            const { username, password } = req.body;
             if ((!username) || !password) {
                 return res.status(400).json({
                     status: 'failed',
                     message: 'Username or email and password are required',
-                    code:400
+                    code: 400
                 });
             }
-            const user = await User.findOne({username});
-            if(user.isban === true){
+            const user = await User.findOne({ username });
+            if (user.isban === true) {
                 return res.status(403).json({
                     status: 'failed',
                     message: 'You have been banned',
                     code: 403
                 });
             }
-            if(!user){
+            if (!user) {
                 return res.status(404).json({
                     status: 'failed',
                     message: 'No user found with the provided username',
@@ -106,8 +105,8 @@ class UserAuthService {
                 });
             }
             const validPassword = await bcrypt.compare(password, user.password);
-            
-            if(!validPassword){
+
+            if (!validPassword) {
                 return res.status(401).json({
                     status: 'failed',
                     message: 'Invalid password provided for the given username or email',
@@ -121,7 +120,7 @@ class UserAuthService {
                 secure: false,
                 sameSite: "strict"
             })
-            
+
             const data = retrieveData(user)
             return res.status(200).json({
                 status: 'success',
@@ -137,7 +136,7 @@ class UserAuthService {
 
     async refreshToken(req, res, next) {
         const refresh_token = req.cookies.refresh_token;
-        if(!refresh_token){
+        if (!refresh_token) {
             return res.status(401).json({
                 status: 'failed',
                 message: 'Unauthenticated',
@@ -146,19 +145,30 @@ class UserAuthService {
         }
         try {
             const decode = jwt.verify(refresh_token, process.env.SECRET_REFRESH);
-            
-            if (decode && decode.refresh_token) {
-                const key = decode.refresh_token.toString();
-                const data = await getAsync(key);
-                if(JSON.parse(data)?.refresh_token !== refresh_token){
-                    return res.status(403).json({
+
+            if (decode && decode.username) {
+                const key = decode.username.toString();
+                try {
+                    const data = await getAsync(key);
+                    if (JSON.parse(data)?.refresh_token !== refresh_token) {
+                        return res.status(403).json({
+                            status: 'failed',
+                            message: 'Invalid request! refresh token not match',
+                            code: 403
+                        });
+                    }
+                }
+                catch (error) {
+                    return res.status(500).json({
                         status: 'failed',
-                        message: 'Invalid request! refresh token not match',
-                        code: 403
+                        message: error.message,
+                        code: 500
                     });
                 }
-            } 
-    
+
+
+            }
+
             const newAccessToken = genAccessToken(decode);
             const newRefreshToken = genRefreshToken(decode);
             res.cookie('refresh_token', newRefreshToken, {
@@ -166,7 +176,7 @@ class UserAuthService {
                 secure: false,
                 sameSite: "strict"
             });
-    
+
             return res.status(200).json({
                 status: 'success',
                 message: 'refresh token successful',
@@ -180,9 +190,9 @@ class UserAuthService {
             next(error.message)
         }
     }
-    
-       
-    
+
+
+
 }
 
 export default UserAuthService;
